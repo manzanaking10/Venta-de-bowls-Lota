@@ -2,16 +2,16 @@ import React, { useMemo, useState } from "react";
 
 export default function LaRecetaBowlsApp() {
 
-  const WHATSAPP_NUMBER = "56912345678"; // Reemplaza por tu número real
-  const GOOGLE_SCRIPT_URL = "PEGA_AQUI_TU_URL_DE_APPS_SCRIPT"; // URL del Web App de Google Apps Script
+a  const WHATSAPP_NUMBER = "56940653522"; // 
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzKPt6Yk_feFq7pZxN5GErFOGwZs97Z0o0BgGnsiAEs8cGOvaDU27N0Hal4O74V9z_W/exec"; 
 
   const BANK_DETAILS = {
-    titular: "La Receta",
-    banco: "BancoEstado",
+    titular: "Brandon Fernandez",
+    banco: "MACH",
     tipoCuenta: "Cuenta corriente",
-    numeroCuenta: "0000000000",
-    rut: "00.000.000-0",
-    correo: "pagos@lareceta.cl",
+    numeroCuenta: "777919521650",
+    rut: "19.521.650-9",
+    correo: "pagoslareceta@gmail.com",
   };
 
   const BOWL_PRICE = 5500;
