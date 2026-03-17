@@ -156,7 +156,6 @@ export default function LaRecetaBowlsApp() {
     "Maní",
     "Orégano",
     "Cilantro",
-    "Cebolla cryspi",
     "Papas hilo",
   ];
 
