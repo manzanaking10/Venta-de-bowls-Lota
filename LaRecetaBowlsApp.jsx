@@ -115,7 +115,7 @@ export default function LaRecetaBowlsApp() {
     "Arroz blanco",
     "Espirales",
     "Lechuga",
-    "Fideos integrales",
+    "Espirales integrales",
     "Quinoa",
   ];
 
