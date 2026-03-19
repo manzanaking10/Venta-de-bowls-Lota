@@ -144,13 +144,12 @@ export default function LaRecetaBowlsApp() {
   const sauces = [
     "Salsa teriyaki",
     "Salsa de ají",
-    "Soya",
+    "Salsa de Soya",
     "Salsa de ajo",
-    "Acevichada",
+    "Salsa Acevichada",
     "Salsa verde",
     "Salsa de albahaca",
-    "Salsa secreta",
-    "Ciboulette",
+    "Salsa de Ciboulette",
     "Salsa americana",
   ];
 
