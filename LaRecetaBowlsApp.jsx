@@ -51,7 +51,7 @@ function LogoMark() {
         <div className="text-4xl md:text-6xl font-black tracking-tight leading-none">
           La Receta
         </div>
-        <div className="mt-3 inline-flex rounded-full bg-[#eadf9e] px-4 py-2 text-sm md:text-base font-bold text-[#58653d]">
+        <div className="mt-3 inline-flex rounded-full bg-[#eadf9e] px-4 py-2 text-sm font-bold text-[#58653d] md:text-base">
           Bowls a tu gusto
         </div>
       </div>
@@ -68,6 +68,7 @@ function createEmptyCustomer() {
     telefono: "",
     direccion: "",
     comuna: "",
+    horarioEntrega: "",
     notas: "",
   };
 }
@@ -89,7 +90,7 @@ export default function LaRecetaBowlsApp() {
   const BANK_DETAILS = {
     titular: "Brandon Fernandez",
     banco: "Banco Estado",
-    tipoCuenta: "Cuenta Rut (vista)",
+    tipoCuenta: "Cuenta RUT (vista)",
     numeroCuenta: "19521650",
     rut: "19.521.650-9",
     correo: "pagoslarecetabowls@gmail.com",
@@ -100,19 +101,29 @@ export default function LaRecetaBowlsApp() {
   const EXTRA_PRICE = 500;
   const DELIVERY_PRICE = 0;
 
+  const deliveryTimes = [
+    "12:00 PM",
+    "12:30 PM",
+    "13:00 PM",
+    "13:30 PM",
+    "14:00 PM",
+    "14:30 PM",
+    "15:00 PM",
+  ];
+
   const bases = [
     "Arroz blanco",
     "Espirales",
     "Lechuga",
     "Fideos integrales",
-    "Arroz integral",
+    "Quinoa",
   ];
 
   const proteins = [
     "Pollo teriyaki",
     "Atún",
     "Huevo duro",
-    "Pollo cryspi",
+    "Pollo crispy",
     "Pollo a la plancha",
     "Camarón ecuatoriano",
   ];
@@ -132,13 +143,15 @@ export default function LaRecetaBowlsApp() {
 
   const sauces = [
     "Salsa teriyaki",
-    "Mayo sriracha",
+    "Salsa de ají",
     "Soya",
     "Salsa de ajo",
     "Acevichada",
     "Salsa verde",
-    "Albahaca",
+    "Salsa de albahaca",
     "Salsa secreta",
+    "Ciboulette",
+    "Salsa americana",
   ];
 
   const extras = [
@@ -168,10 +181,7 @@ export default function LaRecetaBowlsApp() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [copiedTransfer, setCopiedTransfer] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
-
   const [paymentMethod, setPaymentMethod] = useState("");
-  const [receiptFile, setReceiptFile] = useState(null);
-  const [receiptPreviewUrl, setReceiptPreviewUrl] = useState("");
 
   const clearMessages = () => {
     setError("");
@@ -278,13 +288,9 @@ export default function LaRecetaBowlsApp() {
     if (!customer.telefono.trim()) return "Falta el teléfono.";
     if (!customer.direccion.trim()) return "Falta la dirección.";
     if (!customer.comuna.trim()) return "Falta la comuna.";
+    if (!customer.horarioEntrega.trim()) return "Debes seleccionar un horario de entrega.";
     if (!cart.length) return "Debes agregar al menos 1 bowl al pedido.";
     if (!paymentMethod) return "Debes seleccionar un método de pago.";
-
-    if (paymentMethod === "transferencia" && !receiptFile) {
-      return "Debes subir la captura de transferencia antes de enviar.";
-    }
-
     return "";
   };
 
@@ -296,6 +302,7 @@ export default function LaRecetaBowlsApp() {
       `Teléfono: ${customer.telefono}`,
       `Dirección: ${customer.direccion}`,
       `Comuna: ${customer.comuna}`,
+      `Horario de entrega: ${customer.horarioEntrega}`,
       `Notas: ${customer.notas || "Sin notas"}`,
       "",
       `Método de pago: ${
@@ -340,8 +347,6 @@ export default function LaRecetaBowlsApp() {
 
     if (paymentMethod === "transferencia") {
       lines.push("Pagaré por transferencia.");
-      lines.push(`Comprobante cargado en la web: ${receiptFile?.name || "Sí"}`);
-      lines.push("Adjuntaré la captura en este chat de WhatsApp.");
       lines.push("");
       lines.push("Datos de transferencia:");
       lines.push(`Titular: ${BANK_DETAILS.titular}`);
@@ -361,43 +366,7 @@ export default function LaRecetaBowlsApp() {
 
     if (method !== "transferencia") {
       setPaymentOpen(false);
-      setReceiptFile(null);
-
-      if (receiptPreviewUrl) {
-        URL.revokeObjectURL(receiptPreviewUrl);
-      }
-      setReceiptPreviewUrl("");
     }
-  };
-
-  const handleReceiptChange = (event) => {
-    clearMessages();
-
-    const file = event.target.files?.[0];
-
-    if (!file) {
-      setReceiptFile(null);
-      if (receiptPreviewUrl) {
-        URL.revokeObjectURL(receiptPreviewUrl);
-      }
-      setReceiptPreviewUrl("");
-      return;
-    }
-
-    if (!file.type.startsWith("image/")) {
-      setError("La captura debe ser una imagen.");
-      event.target.value = "";
-      return;
-    }
-
-    setReceiptFile(file);
-
-    if (receiptPreviewUrl) {
-      URL.revokeObjectURL(receiptPreviewUrl);
-    }
-
-    const objectUrl = URL.createObjectURL(file);
-    setReceiptPreviewUrl(objectUrl);
   };
 
   const sendOrder = () => {
@@ -417,13 +386,7 @@ export default function LaRecetaBowlsApp() {
 
       window.open(url, "_blank");
 
-      if (paymentMethod === "efectivo") {
-        setSuccess("Pedido enviado por WhatsApp.");
-      } else {
-        setSuccess(
-          "Pedido enviado por WhatsApp. Ahora adjunta manualmente la captura en el chat."
-        );
-      }
+      setSuccess("Pedido enviado por WhatsApp.");
     } catch (e) {
       setError(e.message || "Ocurrió un error al abrir WhatsApp.");
     } finally {
@@ -455,21 +418,13 @@ export default function LaRecetaBowlsApp() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    return () => {
-      if (receiptPreviewUrl) {
-        URL.revokeObjectURL(receiptPreviewUrl);
-      }
-    };
-  }, [receiptPreviewUrl]);
-
   return (
     <div className="min-h-screen bg-[#f6f3ea] text-stone-900">
       <header className="relative overflow-hidden border-b border-stone-200 bg-[#efede3]">
         <div className="absolute inset-0 opacity-40">
           <div className="absolute left-4 top-8 text-5xl">🥕</div>
           <div className="absolute right-8 top-10 text-5xl">🌽</div>
-          <div className="absolute left-1/4 bottom-8 text-5xl">🥬</div>
+          <div className="absolute bottom-8 left-1/4 text-5xl">🥬</div>
           <div className="absolute right-1/4 bottom-10 text-5xl">🫑</div>
         </div>
 
@@ -569,8 +524,20 @@ export default function LaRecetaBowlsApp() {
                 value={customer.comuna}
                 onChange={(e) => updateCustomer("comuna", e.target.value)}
               />
+              <select
+                className="rounded-2xl border border-stone-300 bg-white px-4 py-3 text-stone-700"
+                value={customer.horarioEntrega}
+                onChange={(e) => updateCustomer("horarioEntrega", e.target.value)}
+              >
+                <option value="">Selecciona horario de entrega</option>
+                {deliveryTimes.map((time) => (
+                  <option key={time} value={time}>
+                    {time}
+                  </option>
+                ))}
+              </select>
               <input
-                className="rounded-2xl border border-stone-300 px-4 py-3"
+                className="rounded-2xl border border-stone-300 px-4 py-3 md:col-span-2"
                 placeholder="Notas (opcional)"
                 value={customer.notas}
                 onChange={(e) => updateCustomer("notas", e.target.value)}
@@ -732,7 +699,7 @@ export default function LaRecetaBowlsApp() {
           </SectionCard>
         </div>
 
-        <aside className="space-y-6 xl:sticky xl:top-4 h-fit">
+        <aside className="h-fit space-y-6 xl:sticky xl:top-4">
           <SectionCard title="Tu pedido" subtitle="Puedes seleccionar más de un bowl.">
             {!cart.length ? (
               <div className="rounded-2xl bg-stone-50 p-4 text-stone-500">
@@ -822,7 +789,7 @@ export default function LaRecetaBowlsApp() {
 
                 <ChoiceButton
                   label="Pago por transferencia"
-                  helper="Debes subir la captura antes de enviar."
+                  helper="El pedido también se envía de inmediato por WhatsApp."
                   active={paymentMethod === "transferencia"}
                   onClick={() => handlePaymentMethodChange("transferencia")}
                 />
@@ -830,37 +797,10 @@ export default function LaRecetaBowlsApp() {
 
               {paymentMethod === "transferencia" ? (
                 <div className="mt-4 space-y-3">
-                  <div className="rounded-2xl bg-stone-50 p-4">
-                    <label className="mb-2 block text-sm font-semibold text-stone-700">
-                      Sube la captura de transferencia
-                    </label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleReceiptChange}
-                      className="block w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm"
-                    />
-                    <p className="mt-2 text-xs text-stone-500">
-                      La imagen no se adjunta sola a WhatsApp. El sistema valida que la
-                      cargaste, abre el pedido y luego tú la envías manualmente en el chat.
-                    </p>
+                  <div className="rounded-2xl bg-stone-50 p-4 text-sm text-stone-600">
+                    Al enviar el pedido, se abrirá WhatsApp igual que en efectivo, junto
+                    con los datos de transferencia.
                   </div>
-
-                  {receiptFile ? (
-                    <div className="rounded-2xl border border-stone-200 bg-white p-3">
-                      <div className="text-sm font-semibold text-stone-800">
-                        Archivo cargado: {receiptFile.name}
-                      </div>
-
-                      {receiptPreviewUrl ? (
-                        <img
-                          src={receiptPreviewUrl}
-                          alt="Comprobante"
-                          className="mt-3 max-h-56 w-full rounded-2xl object-contain border border-stone-200"
-                        />
-                      ) : null}
-                    </div>
-                  ) : null}
 
                   <button
                     onClick={() => setPaymentOpen(true)}
@@ -895,7 +835,7 @@ export default function LaRecetaBowlsApp() {
                   : paymentMethod === "efectivo"
                   ? "Enviar pedido por WhatsApp"
                   : paymentMethod === "transferencia"
-                  ? "Enviar pedido + comprobante por WhatsApp"
+                  ? "Enviar pedido por WhatsApp"
                   : "Selecciona un método de pago"}
               </button>
             </div>
@@ -912,7 +852,7 @@ export default function LaRecetaBowlsApp() {
                   Datos de transferencia
                 </h3>
                 <p className="mt-1 text-sm text-stone-500">
-                  Usa estos datos para pagar y luego sube la captura.
+                  Usa estos datos para realizar el pago.
                 </p>
               </div>
               <button
